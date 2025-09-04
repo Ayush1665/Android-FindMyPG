@@ -1,4 +1,5 @@
 const PG = require('../models/PG');
+const redis = require("../config/redis")
 
 // Get all PGs with filtering
 const getAllPGs = async (req, res) => {
@@ -24,28 +25,16 @@ const getAllPGs = async (req, res) => {
     if (isAvailable !== undefined) {
       filter.isAvailable = isAvailable === 'true';
     }
-    
-    // Add a numeric rent field for filtering
-    let pgs = await PG.find(filter);
-    pgs = pgs.map(pg => {
-      const rentNumeric = parseInt(pg.rent.replace(/,/g, ''));
-      return { ...pg.toObject(), rentNumeric };
-    });
-    
-    // Apply rent filtering if needed
-    if (minRent || maxRent) {
-      pgs = pgs.filter(pg => {
-        if (minRent && pg.rentNumeric < parseInt(minRent)) return false;
-        if (maxRent && pg.rentNumeric > parseInt(maxRent)) return false;
-        return true;
-      });
-    }
+
+    // ✅ Query is now direct & efficient (no map/filter after query)
+    const pgs = await PG.find(filter).lean();
     
     res.json(pgs);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Get single PG by ID
 const getPGById = async (req, res) => {
@@ -69,6 +58,7 @@ const createPG = async (req, res) => {
     
     const pg = new PG({
       ...req.body,
+      rentNumeric: parseInt(rent.replace(/,/g, '')), // store numeric value here
       id: newId
     });
     
@@ -82,16 +72,22 @@ const createPG = async (req, res) => {
 // Update PG
 const updatePG = async (req, res) => {
   try {
+    const updateData = { ...req.body };
+
+    if (updateData.rent) {
+      updateData.rentNumeric = parseInt(updateData.rent.replace(/,/g, ''));
+    }
+
     const pg = await PG.findOneAndUpdate(
       { id: parseInt(req.params.id) },
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
-    
+
     if (!pg) {
       return res.status(404).json({ message: 'PG not found' });
     }
-    
+
     res.json(pg);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -154,6 +150,10 @@ const getServices = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+const clearCache = async () => {
+  await redis.flushall(); // clears all cache (simple for now)
 };
 
 module.exports = {

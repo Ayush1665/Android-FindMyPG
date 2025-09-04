@@ -11,21 +11,22 @@ const {
   getServices
 } = require('../controllers/pgController');
 const { validatePG } = require('../middleware/validation');
+const cache=require("../middleware/cache")
 
 // GET /api/pgs - Get all PGs with optional filtering
-router.get('/', getAllPGs);
+router.get('/', cache("pgs:"),getAllPGs);
 
 // GET /api/pgs/search?q=query - Search PGs
-router.get('/search', searchPGs);
+router.get('/search',cache("pgs-search:"), searchPGs);
 
 // GET /api/pgs/locations - Get all locations
-router.get('/locations', getLocations);
+router.get('/locations', cache("pgs-locations:"), getLocations);
 
 // GET /api/pgs/services - Get all services
-router.get('/services', getServices);
+router.get('/services', cache("pgs-services:"), getServices);
 
 // GET /api/pgs/:id - Get single PG by ID
-router.get('/:id', getPGById);
+router.get('/:id',cache("pgs:"),  getPGById);
 
 // POST /api/pgs - Create new PG
 router.post('/', validatePG, createPG);
