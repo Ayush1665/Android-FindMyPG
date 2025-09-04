@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "554658236020",
+    "project_id": "find-my-pg-fde6f",
+    "storage_bucket": "find-my-pg-fde6f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554658236020:android:0a65ab278ea0b9ac20b321",
+        "android_client_info": {
+          "package_name": "com.awesomeproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC90RBErubGHL8cL1SGF8BzVztwhuIRHVg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
